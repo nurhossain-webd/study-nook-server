@@ -1,11 +1,12 @@
 const express = require("express");
 require("dotenv").config();
-
+const cors = require("cors");
 const { MongoClient, ServerApiVersion } = require("mongodb");
 
 const app = express();
 const port = process.env.PORT || 8000;
 
+app.use(cors());
 app.use(express.json());
 
 const uri = process.env.MONGO_URI;
@@ -24,6 +25,12 @@ async function run() {
 
         const database = client.db("study-nook");
         const roomsCollection = database.collection("rooms");
+
+        app.post("/rooms", async (req, res) => {
+            const roomData = req.body;
+            const result = await roomsCollection.insertOne(roomData);
+            res.send(result);
+        });
 
         app.get("/rooms", async (req, res) => {
             const result = await roomsCollection
