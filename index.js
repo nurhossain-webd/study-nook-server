@@ -32,7 +32,7 @@ async function run() {
             res.send(result);
         });
 
-        app.get("/rooms", async (req, res) => {
+        app.get("/latest-rooms", async (req, res) => {
             const result = await roomsCollection
                 .find()
                 .sort({ createdAt: -1 })
