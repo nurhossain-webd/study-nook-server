@@ -52,6 +52,16 @@ async function run() {
             res.send(result);
         });
 
+        app.patch("/rooms/:id", async (req, res) => {
+            const id = req.params.id;
+            const updateData = req.body;
+            const result = await roomsCollection.updateOne(
+                { _id: new ObjectId(id) },
+                { $set: updateData }
+            );
+            res.send(result);
+        });
+
         console.log("Connected to MongoDB successfully!");
     } finally {
         // do not close client
