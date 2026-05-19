@@ -26,9 +26,8 @@ async function run() {
         const database = client.db("study-nook");
         const roomsCollection = database.collection("rooms");
 
-        app.post("/rooms", async (req, res) => {
-            const roomData = req.body;
-            const result = await roomsCollection.insertOne(roomData);
+        app.get("/rooms", async (req, res) => {
+            const result = await roomsCollection.find().toArray();
             res.send(result);
         });
 
@@ -39,6 +38,11 @@ async function run() {
                 .limit(6)
                 .toArray();
 
+            res.send(result);
+        });
+        app.post("/rooms", async (req, res) => {
+            const roomData = req.body;
+            const result = await roomsCollection.insertOne(roomData);
             res.send(result);
         });
 
