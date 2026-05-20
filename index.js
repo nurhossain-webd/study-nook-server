@@ -25,10 +25,11 @@ async function run() {
 
         const database = client.db("study-nook");
         const roomsCollection = database.collection("rooms");
+        const bookingsCollection = database.collection("bookings");
 
         app.get("/rooms", async (req, res) => {
             const result = await roomsCollection.find().toArray();
-            res.send(result);
+            res.json(result);
         });
 
         app.get("/latest-rooms", async (req, res) => {
@@ -50,6 +51,35 @@ async function run() {
             const roomData = req.body;
             const result = await roomsCollection.insertOne(roomData);
             res.send(result);
+        });
+        app.post("/bookings", async (req, res) => {
+            const bookingData = req.body;
+
+            const existingBooking = await bookingsCollection.findOne({
+                roomId: bookingData.roomId,
+                date: bookingData.date,
+                status: "confirmed",
+                startTime: { $lt: bookingData.endTime },
+                endTime: { $gt: bookingData.startTime },
+            });
+
+            if (existingBooking) {
+                return res.status(409).send({
+                    message: "This room is already booked for the selected time slot",
+                });
+            }
+
+            bookingData.status = "confirmed";
+            bookingData.createdAt = new Date();
+
+            const result = await bookingsCollection.insertOne(bookingData);
+
+            await roomsCollection.updateOne(
+                { _id: new ObjectId(bookingData.roomId) },
+                { $inc: { bookingCount: 1 } }
+            );
+
+            res.json(result);
         });
 
         app.patch("/rooms/:id", async (req, res) => {
