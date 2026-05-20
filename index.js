@@ -92,6 +92,28 @@ async function run() {
             res.json(result);
         });
 
+        app.patch("/bookings/:id/cancel", async (req, res) => {
+            const id = req.params.id;
+            const email = req.body.email;
+
+            const booking = await bookingsCollection.findOne({ _id: new ObjectId(id) });
+
+            if (!booking) {
+                return res.status(404).send({ message: "Booking not found" });
+            }
+
+            if (booking.userEmail !== email) {
+                return res.status(403).send({ message: "Forbidden: This booking is not yours" });
+            }
+
+            const result = await bookingsCollection.updateOne(
+                { _id: new ObjectId(id) },
+                { $set: { status: "cancelled", cancelledAt: new Date() } }
+            );
+
+            res.send(result);
+        });
+
         app.patch("/rooms/:id", async (req, res) => {
             const id = req.params.id;
             const updateData = req.body;
