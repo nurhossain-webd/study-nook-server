@@ -46,6 +46,16 @@ async function run() {
             const result = await roomsCollection.findOne({ _id: new ObjectId(id) });
             res.send(result);
         });
+        app.get("/bookings", async (req, res) => {
+            const email = req.query.email;
+
+            const result = await bookingsCollection
+                .find({ userEmail: email })
+                .sort({ createdAt: -1 })
+                .toArray();
+
+            res.send(result);
+        });
 
         app.post("/rooms", async (req, res) => {
             const roomData = req.body;
