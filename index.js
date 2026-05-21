@@ -55,10 +55,28 @@ async function run() {
         const bookingsCollection = database.collection("bookings");
 
         // public: all rooms
-        app.get("/rooms", async (req, res) => {
-            const result = await roomsCollection.find().toArray();
-            res.json(result);
-        });
+      app.get("/rooms", async (req, res) => {
+    const search = req.query.search;
+    const amenity = req.query.amenity;
+
+    const query = {};
+
+    if (search) {
+        query.roomName = { $regex: search, $options: "i" };
+    }
+
+    if (amenity) {
+        const amenitiesArray = Array.isArray(amenity) ? amenity : [amenity];
+        query.amenities = { $in: amenitiesArray };
+    }
+
+    const result = await roomsCollection
+        .find(query)
+        .sort({ createdAt: -1 })
+        .toArray();
+
+    res.json(result);
+});
 
         // public: latest 6 rooms
         app.get("/latest-rooms", async (req, res) => {
