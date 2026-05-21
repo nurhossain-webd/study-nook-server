@@ -57,6 +57,17 @@ async function run() {
             res.send(result);
         });
 
+        app.get("/my-listings", async (req, res) => {
+            const email = req.query.email;
+
+            const result = await roomsCollection
+                .find({ ownerEmail: email })
+                .sort({ createdAt: -1 })
+                .toArray();
+
+            res.send(result);
+        });
+
         app.post("/rooms", async (req, res) => {
             const roomData = req.body;
             const result = await roomsCollection.insertOne(roomData);
